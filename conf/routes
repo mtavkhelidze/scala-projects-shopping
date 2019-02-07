@@ -3,8 +3,12 @@
 # https://www.playframework.com/documentation/latest/ScalaRouting
 # ~~~~
 
-# An example controller showing a sample home page
-GET        /                    controllers.HomeController.index
+GET           /assets/*file                               controllers.Assets.versioned(path="/public", file: Asset)
 
-# Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file        controllers.Assets.versioned(path="/public", file: Asset)
+GET           /api/products                               controllers.APIController.listProducts
+POST          /api/products                               controllers.APIController.addProduct
+
+GET           /api/cart/products                          controllers.APIController.listCartProducts
+DELETE        /api/cart/products/:id                      controllers.APIController.deleteCartProduct(id)
+POST          /api/cart/products/:id/quantity/:qty        controllers.APIController.addCartProduct(id, qty)
+PUT           /api/cart/products/:id/quantity/:qty        controllers.APIController.updateCartProduct(id, qty)
