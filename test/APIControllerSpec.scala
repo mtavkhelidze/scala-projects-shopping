@@ -27,7 +27,7 @@ class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPe
     val client = app.injector.instanceOf[WSClient]
 
     "list all products" in {
-      val res = Await.result(client.url(products).get(), 1 seconds)
+      val res = Await.result(client.url(products).get(), 2 seconds)
       res.status mustBe OK
 
       res.body must include("pepper")
@@ -38,13 +38,13 @@ class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPe
     "add a product" in {
       val newProduct =
         """
-          |{       "name": "NewOne",
-          |        "code": "New",
-          |        "description": "The brand new product",
-          |        "price" : 100.0
+          |{  "name":"NewOne",
+          |   "code":"New",
+          |   "description":"The brand new product",
+          |   "price":100.0
           |}
           |""".stripMargin
-      val posted = client.url(addProduct).post(newProduct).futureValue
+      val posted = Await.result(client.url(addProduct).post(newProduct), 2 seconds)
       posted.status mustBe OK
 
       val res = client.url(products).get().futureValue
