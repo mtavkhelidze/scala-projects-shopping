@@ -15,11 +15,11 @@ class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPe
   val cart = s"$base/cart"
 
   val addProduct = s"$products"
-  val productsInCart = s"$cart/products"
+  val allProductInCart = s"$cart/products"
 
   def deleteProductsInCart(id: String) = s"$cart/products/$id"
 
-  def updateProductsInCart(id: String, quantity: Int) =
+  def productInCart(id: String, quantity: Int) =
     s"$cart/products/$id/quantity/$quantity"
 
 
@@ -27,8 +27,12 @@ class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPe
     val client = app.injector.instanceOf[WSClient]
 
     "list all products" in {
-      val resp = Await.result(client.url(products).get(), 1 seconds)
-      resp.status mustBe OK
+      val res = Await.result(client.url(products).get(), 1 seconds)
+      res.status mustBe OK
+
+      res.body must include("pepper")
+      res.body must include("nao")
+      res.body must include("beobot")
     }
 
     "add a product" in {
@@ -41,6 +45,33 @@ class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPe
           |}
           |""".stripMargin
       val posted = client.url(addProduct).post(newProduct).futureValue
+      posted.status mustBe OK
+
+      val res = client.url(products).get().futureValue
+      res.body must include("NewOne")
+    }
+
+    "add a product in the cart" in {
+      val id = "ald1"
+      val qty = 1
+      val posted = client.url(productInCart(id, qty)).post("").futureValue
+      posted.status mustBe OK
+    }
+
+    "delete a product from the cart" in {
+      val id = "ald1"
+      val posted = client.url(deleteProductsInCart(id)).post("").futureValue
+      posted.status mustBe OK
+    }
+
+    "update a product in the cart" in {
+      val id = "ald1"
+      var qty = 1
+      var posted = client.url(productInCart(id, qty)).put("").futureValue
+      posted.status mustBe OK
+
+      qty = 99
+      posted = client.url(productInCart(id, qty)).put("").futureValue
       posted.status mustBe OK
     }
   }
