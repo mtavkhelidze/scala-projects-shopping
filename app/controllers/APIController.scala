@@ -11,13 +11,14 @@ import play.api.mvc._
 import play.api.Logger
 import play.mvc.{ Result, Results }
 
-import scala.concurrent.{ ExecutionContext, ExecutionContextExecutor, Future }
+import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
 class APIController @Inject()(
-    cc: ControllerComponents, products: ProductDao
+    cc: ControllerComponents,
+    products: ProductDao,
+    implicit val ec: ExecutionContext
 ) extends AbstractController(cc) with Circe {
-  implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
   def listProducts(): Action[AnyContent] = Action.async { _ =>
     for {
@@ -28,19 +29,16 @@ class APIController @Inject()(
   def addProduct(): Action[AnyContent] = Action.async { req =>
     val maybeProduct = decode[Product](req.body.asText.getOrElse(""))
     maybeProduct match {
-      case Right(product) => {
+      case Right(product) =>
         val insert = products.insert(product).recover {
-          case e => {
+          case e =>
             Logger.error(s"Error writing database: $e")
             InternalServerError("Cannot write in the database")
-          }
         }
         insert.map(_ => OK)
-      }
-      case Left(e) => {
+      case Left(e) =>
         Logger.error(s"Error while adding product: $e")
         Future.successful(BadRequest)
-      }
     }
     Future.successful(Ok)
   }
@@ -52,4 +50,11 @@ class APIController @Inject()(
   def addCartProduct(id: String, qty: String): Result = Results.TODO
 
   def updateCartProduct(id: String, qty: String): Result = Results.TODO
+
+  def login(): Action[AnyContent] = Action { req =>
+    req.body.asText match {
+      case Some(user) => Ok.withSession("user" -> user)
+      case None => BadRequest
+    }
+  }
 }

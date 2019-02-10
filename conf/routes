@@ -12,3 +12,5 @@ GET           /api/cart/products                          controllers.APIControl
 DELETE        /api/cart/products/:id                      controllers.APIController.deleteCartProduct(id)
 POST          /api/cart/products/:id/quantity/:qty        controllers.APIController.addCartProduct(id, qty)
 PUT           /api/cart/products/:id/quantity/:qty        controllers.APIController.updateCartProduct(id, qty)
+
+POST          /api/login                                  controllers.APIController.login
