@@ -1,0 +1,18 @@
+.content {
+    margin: 0 auto;
+    width: 80%;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    flex-flow: column;
+}
+
+.title {
+    text-align: center;
+}
+
+.logo {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
