@@ -66,30 +66,6 @@ class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPe
       res.body must include("NewOne")
     }
 
-    "add a product in the cart" in {
-      val id = "ald1"
-      val qty = 1
-      val posted = client.url(productQtyInCart(id, qty)).post("").futureValue
-      posted.status mustBe OK
-    }
-
-    "delete a product from the cart" in {
-      val id = "ald1"
-      val posted = client.url(productInCart(id)).delete.futureValue
-      posted.status mustBe OK
-    }
-
-    "update a product in the cart" in {
-      val id = "ald1"
-      var qty = 1
-      var posted = client.url(productQtyInCart(id, qty)).put("").futureValue
-      posted.status mustBe OK
-
-      qty = 99
-      posted = client.url(productQtyInCart(id, qty)).put("").futureValue
-      posted.status mustBe OK
-    }
-
     "return a cookie, when user logs in" in {
       val cookie = client.url(login).post("myId").map { res =>
         res.headers.get("Set-Cookie").map(

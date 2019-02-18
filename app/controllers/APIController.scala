@@ -1,15 +1,14 @@
 package controllers
 
-import dao.ProductDao
+import dao.{ CartDao, ProductDao }
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
 import javax.inject.{ Inject, Singleton }
-import models.Product
+import models.{ Cart, Product }
 import play.api.libs.circe.Circe
-import play.api.mvc._
 import play.api.Logger
-import play.mvc.{ Result, Results }
+import play.api.mvc._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -17,8 +16,16 @@ import scala.concurrent.{ ExecutionContext, Future }
 class APIController @Inject()(
     cc: ControllerComponents,
     products: ProductDao,
+    cart: CartDao,
     implicit val ec: ExecutionContext
 ) extends AbstractController(cc) with Circe {
+
+  private val recover: PartialFunction[Throwable, Result] = {
+    case e: Throwable => {
+      Logger.error(s"Database error: $e")
+      InternalServerError("Database error")
+    }
+  }
 
   def listProducts(): Action[AnyContent] = Action.async { _ =>
     for {
@@ -30,12 +37,8 @@ class APIController @Inject()(
     val maybeProduct = decode[Product](req.body.asText.getOrElse(""))
     maybeProduct match {
       case Right(product) =>
-        val insert = products.insert(product).recover {
-          case e =>
-            Logger.error(s"Error writing database: $e")
-            InternalServerError("Cannot write in the database")
-        }
-        insert.map(_ => OK)
+        Logger.info(s"Adding product: $product")
+        products.insert(product).map(_ => OK).recover(recover)
       case Left(e) =>
         Logger.error(s"Error while adding product: $e")
         Future.successful(BadRequest)
@@ -43,13 +46,51 @@ class APIController @Inject()(
     Future.successful(Ok)
   }
 
-  def listCartProducts(): Result = Results.TODO
+  def listCartProducts(): Action[AnyContent] = Action.async { req =>
+    val userFuture: Option[String] = req.session.get("user")
+    userFuture match {
+      case Some(user) => {
+        Logger.info(s"User '$user' listing products in cart")
+        cart.cartFor(user).map(products => Ok(products.asJson)).recover(recover)
+      }
+      case None => Future.successful(BadRequest)
+    }
+  }
 
-  def deleteCartProduct(id: String): Result = Results.TODO
+  def addCartProduct(id: String, qty: String): Action[AnyContent] =
+    Action.async { req =>
+      val userFuture: Option[String] = req.session.get("user")
+      userFuture match {
+        case Some(user) => {
+          Logger.info(s"User '$user' inserting $id:$qty in cart")
+          cart.insert(Cart(user, id, qty.toInt)).recover(recover).map(_ => Ok)
+        }
+        case None => Future.successful(BadRequest)
+      }
+    }
 
-  def addCartProduct(id: String, qty: String): Result = Results.TODO
+  def updateCartProduct(id: String, qty: String): Action[AnyContent] =
+    Action.async { req =>
+      val userFuture = req.session.get("user")
+      userFuture match {
+        case Some(user) => {
+          Logger.info(s"User '$user' updating $id to $qty in cart")
+          cart.update(Cart(user, id, qty.toInt)).recover(recover).map(_ => Ok)
+        }
+        case None => Future.successful(BadRequest)
+      }
+    }
 
-  def updateCartProduct(id: String, qty: String): Result = Results.TODO
+  def deleteCartProduct(id: String): Action[AnyContent] = Action.async { req =>
+    val userFuture = req.session.get("user")
+    userFuture match {
+      case Some(user) => {
+        Logger.info(s"User '$user' deleting $id from cart")
+        cart.remove(user, id).recover(recover).map(_ => Ok)
+      }
+      case None => Future.successful(BadRequest)
+    }
+  }
 
   def login(): Action[AnyContent] = Action { req =>
     req.body.asText match {

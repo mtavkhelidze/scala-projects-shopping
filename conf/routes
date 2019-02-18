@@ -7,11 +7,17 @@ GET           /                                           controllers.HomeContro
 GET           /assets/*file                               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET           /api/products                               controllers.APIController.listProducts
+
++nocsrf
 POST          /api/products                               controllers.APIController.addProduct
 
 GET           /api/cart/products                          controllers.APIController.listCartProducts
++nocsrf
 DELETE        /api/cart/products/:id                      controllers.APIController.deleteCartProduct(id)
++nocsrf
 POST          /api/cart/products/:id/quantity/:qty        controllers.APIController.addCartProduct(id, qty)
++nocsrf
 PUT           /api/cart/products/:id/quantity/:qty        controllers.APIController.updateCartProduct(id, qty)
 
++nocsrf
 POST          /api/login                                  controllers.APIController.login
