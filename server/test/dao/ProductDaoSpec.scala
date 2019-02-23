@@ -1,6 +1,6 @@
 package dao
 
-import models.Product
+import ge.zgharbi.shopping.shared.Product
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play._

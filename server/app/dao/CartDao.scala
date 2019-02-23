@@ -1,14 +1,16 @@
 package dao
 
+import ge.zgharbi.shopping.shared.Cart
 import javax.inject._
-import models.Cart
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 class CartDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
-    (implicit executionContext: ExecutionContext) extends HasDatabaseConfigProvider[JdbcProfile] {
+    (
+        implicit executionContext: ExecutionContext
+    ) extends HasDatabaseConfigProvider[JdbcProfile] {
 
   import profile.api._
 
@@ -29,7 +31,9 @@ class CartDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
     db.run(q.update(cart.quantity))
   }
 
-  private def matchKey(table: CartTable, user: String, productCode: String): Rep[Boolean] = {
+  private def matchKey(
+      table: CartTable, user: String, productCode: String
+  ): Rep[Boolean] = {
     table.user === user && table.productCode === productCode
   }
 

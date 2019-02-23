@@ -1,6 +1,6 @@
+import ge.zgharbi.shopping.shared.Cart
 import io.circe.generic.auto._
 import io.circe.parser.decode
-import models.Cart
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Seconds, Span }
 import org.scalatestplus.play.PlaySpec
@@ -11,7 +11,8 @@ import play.api.libs.ws.{ DefaultWSCookie, WSClient }
 import scala.concurrent.{ ExecutionContext, ExecutionContextExecutor }
 import scala.language.postfixOps
 
-class APIControllerSpec extends PlaySpec with ScalaFutures with GuiceOneServerPerSuite {
+class APIControllerSpec extends PlaySpec with ScalaFutures with
+    GuiceOneServerPerSuite {
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
   implicit val defaultPatience: PatienceConfig =

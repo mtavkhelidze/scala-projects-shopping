@@ -1,6 +1,6 @@
 package dao
 
-import models.Cart
+import ge.zgharbi.shopping.shared.Cart
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.Matchers._
 import org.scalatest.RecoverMethods._

@@ -1,12 +1,12 @@
 package controllers
 
 import dao.{ CartDao, ProductDao }
+import ge.zgharbi.shopping.shared.{ Cart, Product }
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
 import io.swagger.annotations._
 import javax.inject.{ Inject, Singleton }
-import models.{ Cart, Product }
 import play.api.libs.circe.Circe
 import play.api.Logger
 import play.api.mvc._
@@ -47,7 +47,7 @@ class APIController @Inject()(
       new ApiImplicitParam(
         value = "The product to add",
         required = true,
-        dataType = "models.Product",
+        dataType = "ge.zgharbi.shopping.shared.Product",
         paramType = "body"
       )
     )
@@ -89,7 +89,7 @@ class APIController @Inject()(
       userFuture match {
         case Some(user) => {
           Logger.info(s"User '$user' inserting $id:$qty in cart")
-          cart.insert(Cart(user, id, qty.toInt)).recover(recover).map(_ => Ok)
+          cart.insert(Cart(user, id, qty.toInt)).map(_ => Ok).recover(recover)
         }
         case None => Future.successful(BadRequest)
       }
@@ -101,7 +101,7 @@ class APIController @Inject()(
       userFuture match {
         case Some(user) => {
           Logger.info(s"User '$user' updating $id to $qty in cart")
-          cart.update(Cart(user, id, qty.toInt)).recover(recover).map(_ => Ok)
+          cart.update(Cart(user, id, qty.toInt)).map(_ => Ok).recover(recover)
         }
         case None => Future.successful(BadRequest)
       }
@@ -112,7 +112,7 @@ class APIController @Inject()(
     userFuture match {
       case Some(user) => {
         Logger.info(s"User '$user' deleting $id from cart")
-        cart.remove(user, id).recover(recover).map(_ => Ok)
+        cart.remove(user, id).map(_ => Ok).recover(recover)
       }
       case None => Future.successful(BadRequest)
     }
