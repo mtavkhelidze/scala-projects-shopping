@@ -4,6 +4,7 @@ import dao.{ CartDao, ProductDao }
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
+import io.swagger.annotations._
 import javax.inject.{ Inject, Singleton }
 import models.{ Cart, Product }
 import play.api.libs.circe.Circe
@@ -13,6 +14,7 @@ import play.api.mvc._
 import scala.concurrent.{ ExecutionContext, Future }
 
 @Singleton
+@Api(value = "Product and Cart API")
 class APIController @Inject()(
     cc: ControllerComponents,
     products: ProductDao,
@@ -27,12 +29,36 @@ class APIController @Inject()(
     }
   }
 
+  @ApiOperation(value = "List all products")
+  @ApiResponses(
+    Array(
+      new ApiResponse(code = 200, message = "The list of products")
+    )
+  )
   def listProducts(): Action[AnyContent] = Action.async { _ =>
     for {
       ps <- products.all()
     } yield Ok(ps.asJson)
   }
 
+  @ApiOperation(value = "Add a product", consumes = "text/plain")
+  @ApiImplicitParams(
+    Array(
+      new ApiImplicitParam(
+        value = "The product to add",
+        required = true,
+        dataType = "models.Product",
+        paramType = "body"
+      )
+    )
+  )
+  @ApiResponses(
+    Array(
+      new ApiResponse(code = 200, message = "Product added"),
+      new ApiResponse(code = 400, message = "Invalid body supplied"),
+      new ApiResponse(code = 500, message = "Database error")
+    )
+  )
   def addProduct(): Action[AnyContent] = Action.async { req =>
     val maybeProduct = decode[Product](req.body.asText.getOrElse(""))
     maybeProduct match {
@@ -92,6 +118,23 @@ class APIController @Inject()(
     }
   }
 
+  @ApiOperation(value = "Login to the service", consumes = "text/plain")
+  @ApiImplicitParams(
+    Array(
+      new ApiImplicitParam(
+        value = "Create a session for a user",
+        required = true,
+        dataType = "java.lang.String",
+        paramType = "body"
+      )
+    )
+  )
+  @ApiResponses(
+    Array(
+      new ApiResponse(code = 200, message = "Login successful"),
+      new ApiResponse(code = 400, message = "Invalid user name")
+    )
+  )
   def login(): Action[AnyContent] = Action { req =>
     req.body.asText match {
       case Some(user) => Ok.withSession("user" -> user)

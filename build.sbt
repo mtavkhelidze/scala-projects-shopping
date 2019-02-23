@@ -17,5 +17,7 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % "0.11.1",
   "io.circe" %% "circe-parser" % "0.11.1",
   "io.circe" %% "circe-generic" % "0.11.1",
-  "com.dripower" %% "play-circe" % "2611.0"
+  "com.dripower" %% "play-circe" % "2611.0",
+  "io.swagger" %% "swagger-play2" % "1.6.0",
+  "org.webjars" % "swagger-ui" % "3.20.5"
 )

@@ -21,3 +21,6 @@ PUT           /api/cart/products/:id/quantity/:qty        controllers.APIControl
 
 +nocsrf
 POST          /api/login                                  controllers.APIController.login
+
+GET           /swagger.json                               controllers.ApiHelpController.getResources
+GET           /docs/swagger-ui/*file                      controllers.Assets.at(path="/public/lib/swagger-ui", file:String)
