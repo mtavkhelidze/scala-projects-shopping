@@ -57,7 +57,8 @@ lazy val client = (project in file("client")).settings(commonSettings).settings(
   jsDependencies ++= Seq(
     "org.webjars" % "jquery" % "2.2.1" / "jquery.js" minified "jquery.min.js",
     "org.webjars" % "notifyjs" % "0.4.2" / "notify.js"
-  )
+  ),
+  scalacOptions += "-P:scalajs:sjsDefinedByDefault"
 ).enablePlugins(ScalaJSWeb)
     .dependsOn(sharedJs)
 

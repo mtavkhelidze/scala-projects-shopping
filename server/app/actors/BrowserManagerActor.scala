@@ -2,6 +2,8 @@ package actors
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props, Terminated }
 import ge.zgharbi.shopping.shared.{ Alarm, CartEvent }
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 import scala.collection.mutable.ListBuffer
 
@@ -22,7 +24,7 @@ private class BrowserManagerActor extends Actor with ActorLogging {
       clients.foreach(_ ! Alarm(msg, action).asJson.noSpaces)
 
     case Terminated(b) =>
-      clients _ = b
+      clients -= b
       log.info(s"Close websocket ${b.path}")
   }
 
@@ -30,7 +32,7 @@ private class BrowserManagerActor extends Actor with ActorLogging {
 }
 
 object BrowserManagerActor {
-  def props() = Props(new BrowserManagerActor)
+  def props() = Props(new BrowserManagerActor())
 
   case class AddBrowser(browser: ActorRef)
 

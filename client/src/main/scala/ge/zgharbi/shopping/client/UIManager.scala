@@ -1,15 +1,70 @@
 package ge.zgharbi.shopping.client
 
-import ge.zgharbi.shopping.shared.{ Cart, Product }
+import ge.zgharbi.shopping.shared._
 import io.circe.generic.auto._
 import io.circe.parser._
+import io.circe.syntax._
 import org.querki.jquery._
 import org.scalajs.dom
+import org.scalajs.dom.{ Event, MessageEvent, WebSocket }
+import org.scalajs.dom.html.Document
 
 import scala.scalajs.js.UndefOr
 import scala.util.{ Random, Try }
 
 object UIManager {
+
+  val ws: WebSocket = getWebSocket
+
+  private def notifyUser(alarm: Alarm) = {
+    val notifyClass = if (alarm.action == Add) "info" else "warn"
+    NotifyJS.notify(
+      alarm.message, new Options {
+        className = notifyClass
+        globalPosition = "right bottom"
+      }
+    )
+  }
+
+  private def getWebSocket: WebSocket = {
+    val ws = new WebSocket(getWebSocketURI(dom.document, "api/cart/events"))
+
+    ws.onopen = { event: Event =>
+      println(s"Opened `${event.`type`}`")
+      event.preventDefault;
+    }
+
+    ws.onerror = { event: Event =>
+      System.err.println(s"Error opening WebSocket: `${event.getClass}`")
+    }
+
+    ws.onmessage = { event: MessageEvent =>
+      println(s"WebSocket message: ${event.data.toString}")
+      val msg = decode[Alarm](event.data.toString)
+      msg match {
+        case Right(alarm) =>
+          notifyUser(alarm)
+        case Left(_) =>
+          println(s"Unknown message: ${event.data.toString}")
+      }
+    }
+
+    ws.onclose = { event: Event =>
+      println(s"Close WebSocket: ${event.`type`}")
+    }
+
+    ws
+  }
+
+  private def getWebSocketURI(document: Document, path: String): String = {
+    val proto =
+      if (dom.document.location.protocol == "https")
+        "wss"
+      else
+        "ws"
+    s"$proto://${document.location.host}/$path"
+  }
+
 
   private def putInCart(code: String, qty: Int): JQueryDeferred = {
     val url = s"${UIManager.origin}/api/cart/products/$code/quantity/$qty"
@@ -36,6 +91,7 @@ object UIManager {
       val cart = $(s"#cart-${product.code}-row")
       cart.remove()
       println(s"Product $product removed from the cart")
+      ws.send(CartEvent(user, product, Remove).asJson.noSpaces)
     }
 
     deleteProductFromCart(product.code, onDone)
@@ -47,6 +103,8 @@ object UIManager {
     def onDone(): Unit = {
       val cartContent = cart.addProduct(CartLine(qty, product)).content
       $("#cartPanel").append(cartContent)
+      ws.send(CartEvent(user, product, Add).asJson.noSpaces)
+
     }
 
     postInCart(product.code, qty, onDone)
