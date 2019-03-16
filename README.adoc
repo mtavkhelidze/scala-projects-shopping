@@ -1,0 +1,4 @@
+= Shopping Cart
+
+A shopping cart client/server project from
+https://www.amazon.com/Scala-Programming-Projects-projects-frameworks/dp/1788397649/[Scala Programming Projects]
