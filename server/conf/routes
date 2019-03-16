@@ -24,3 +24,5 @@ POST          /api/login                                  controllers.APIControl
 
 GET           /swagger.json                               controllers.ApiHelpController.getResources
 GET           /docs/swagger-ui/*file                      controllers.Assets.at(path="/public/lib/swagger-ui", file:String)
+
+GET           /api/cart/events                            controllers.WebSockets.cartEventsWS
