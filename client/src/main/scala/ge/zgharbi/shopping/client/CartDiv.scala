@@ -37,7 +37,7 @@ case class CartLine(qty: Int, product: Product) {
     `type` := "button", onclick := removeFromCart
   )("X").render
 
-  private def changeQty() = () => ???
+  private def changeQty() = () => UIManager.updateProduct(product)
 
-  private def removeFromCart() = () => ???
+  private def removeFromCart() = () => UIManager.deleteFromCart(product)
 }
